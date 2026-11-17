@@ -74,6 +74,9 @@ function explain(err) {
   if (/Failed to connect|Timeout|timed out/i.test(msg)) {
     return "The board didn't respond. Unplug it, plug it back in and try again. If it still fails, hold the BOOT button while plugging it in.";
   }
+  if (/Serial data stream stopped|No serial data received/i.test(msg)) {
+    return "Lost contact with the board part way through. Click Check again (or unplug it and plug it back in).";
+  }
   return msg;
 }
 
@@ -131,22 +134,32 @@ async function readFlash(loader, addr, size) {
   return out;
 }
 
-/** Reads the app descriptor of the firmware the bootloader will boot. */
+/**
+ * Reads the app descriptor of the firmware the bootloader will boot.
+ * @returns The descriptor, or null if the flash holds no bootable app (erased,
+ *   or no valid partition table or app partition). Errors talking to the board
+ *   are thrown, never reported as "no firmware".
+ */
 async function readInstalled(loader) {
-  const partitions = parsePartitionTable(await readFlash(loader, PARTITION_TABLE_OFFSET, PARTITION_TABLE_SIZE));
+  const table = await readFlash(loader, PARTITION_TABLE_OFFSET, PARTITION_TABLE_SIZE);
+  let partitions;
+  try {
+    partitions = parsePartitionTable(table);
+  } catch (err) {
+    log(`No usable partition table: ${err.message}`);
+    return null;
+  }
   const otadataPart = findOtaDataPartition(partitions);
   const otadata = otadataPart ? await readFlash(loader, otadataPart.offset, OTADATA_READ_SIZE) : undefined;
-  const app = selectBootPartition(partitions, otadata);
+  let app;
+  try {
+    app = selectBootPartition(partitions, otadata);
+  } catch (err) {
+    log(`No app partition: ${err.message}`);
+    return null;
+  }
   log(`Boot partition: ${app.label} at 0x${app.offset.toString(16)}`);
   return parseAppDescriptor(await readFlash(loader, app.offset, APP_HEADER_READ_SIZE));
-}
-
-function readInstalledSafely(loader) {
-  return readInstalled(loader).catch((err) => {
-    // Erased or corrupt flash has no valid partition table.
-    log(`Couldn't read installed firmware: ${err.message}`);
-    return null;
-  });
 }
 
 function describeInstalled(app) {
@@ -199,11 +212,14 @@ async function inspect(selectedPort) {
   try {
     const { chip, app } = await withBootloader(port, async (loader) => ({
       chip: await loader.chip.getChipDescription(loader),
-      app: await readInstalledSafely(loader),
+      app: await readInstalled(loader),
     }));
     showBoard(chip, app);
   } catch (err) {
     log(`Error: ${err.stack ?? err}`);
+    // Don't leave a previous result on screen as if it were this board's.
+    ui.board.hidden = true;
+    ui.flash.hidden = true;
     setStatus(explain(err), "error");
   } finally {
     setBusy(false);
