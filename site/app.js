@@ -1,3 +1,5 @@
+// esptool-js is pinned to 0.6.1: 0.7.x uploads a new flasher stub whose
+// replies stall part way over the ESP32-S3's USB-Serial/JTAG (see CLAUDE.md).
 import { ESPLoader, Transport } from "./vendor/esptool.js";
 import {
   APP_HEADER_READ_SIZE,
@@ -90,7 +92,6 @@ async function withBootloader(selectedPort, task) {
   const loader = new ESPLoader({
     transport,
     baudrate: BAUD,
-    romBaudrate: BAUD,
     terminal: { clean() {}, writeLine: log, write: log },
   });
   let synced = false;
@@ -119,29 +120,13 @@ async function withBootloader(selectedPort, task) {
 }
 
 /**
- * Reads flash in small pieces. esptool-js asks the stub for 4 KB packets, and
- * over the ESP32-S3's USB-Serial/JTAG in Chrome on macOS any packet larger
- * than ~640 bytes stalls part way and never completes (Python esptool reading
- * the same board is fine). Reads of up to 512 bytes complete reliably.
- */
-const READ_CHUNK = 256;
-
-async function readFlash(loader, addr, size) {
-  const out = new Uint8Array(size);
-  for (let pos = 0; pos < size; pos += READ_CHUNK) {
-    out.set(await loader.readFlash(addr + pos, Math.min(READ_CHUNK, size - pos)), pos);
-  }
-  return out;
-}
-
-/**
  * Reads the app descriptor of the firmware the bootloader will boot.
  * @returns The descriptor, or null if the flash holds no bootable app (erased,
  *   or no valid partition table or app partition). Errors talking to the board
  *   are thrown, never reported as "no firmware".
  */
 async function readInstalled(loader) {
-  const table = await readFlash(loader, PARTITION_TABLE_OFFSET, PARTITION_TABLE_SIZE);
+  const table = await loader.readFlash(PARTITION_TABLE_OFFSET, PARTITION_TABLE_SIZE);
   let partitions;
   try {
     partitions = parsePartitionTable(table);
@@ -150,7 +135,7 @@ async function readInstalled(loader) {
     return null;
   }
   const otadataPart = findOtaDataPartition(partitions);
-  const otadata = otadataPart ? await readFlash(loader, otadataPart.offset, OTADATA_READ_SIZE) : undefined;
+  const otadata = otadataPart ? await loader.readFlash(otadataPart.offset, OTADATA_READ_SIZE) : undefined;
   let app;
   try {
     app = selectBootPartition(partitions, otadata);
@@ -159,7 +144,7 @@ async function readInstalled(loader) {
     return null;
   }
   log(`Boot partition: ${app.label} at 0x${app.offset.toString(16)}`);
-  return parseAppDescriptor(await readFlash(loader, app.offset, APP_HEADER_READ_SIZE));
+  return parseAppDescriptor(await loader.readFlash(app.offset, APP_HEADER_READ_SIZE));
 }
 
 function describeInstalled(app) {
