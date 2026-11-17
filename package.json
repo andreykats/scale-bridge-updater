@@ -1,0 +1,17 @@
+{
+  "name": "scale-bridge-updater",
+  "private": true,
+  "description": "Web firmware updater for the Scale Bridge (ESP32-S3-Zero) over Web Serial",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test",
+    "build": "node scripts/build.mjs",
+    "serve": "python3 -m http.server --directory dist --bind 127.0.0.1 8000",
+    "deploy": "bash scripts/deploy.sh"
+  },
+  "dependencies": {
+    "esptool-js": "0.7.1",
+    "spark-md5": "3.0.2"
+  }
+}
