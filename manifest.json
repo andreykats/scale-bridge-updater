@@ -1,0 +1,34 @@
+{
+  "project": "scale_bridge",
+  "chip": "ESP32-S3",
+  "version": "0.2.0",
+  "date": "Nov 17 2026",
+  "time": "11:44:49",
+  "firmwareCommit": "68d8be3",
+  "idfVersion": "v5.5.5",
+  "flash": {
+    "mode": "dio",
+    "freq": "80m",
+    "size": "4MB"
+  },
+  "files": [
+    {
+      "address": 0,
+      "path": "firmware/0.2.0/bootloader.bin",
+      "size": 20848,
+      "sha256": "6948410991cae37528a178245594d6e1fcde050482f4f3dcfc48e9f15a536f21"
+    },
+    {
+      "address": 32768,
+      "path": "firmware/0.2.0/partition-table.bin",
+      "size": 3072,
+      "sha256": "7f00b6c042a89b15b0cac534f82ed988caf29278ff5700b0c511eb1b5bb7c820"
+    },
+    {
+      "address": 65536,
+      "path": "firmware/0.2.0/scale_bridge.bin",
+      "size": 544576,
+      "sha256": "ba2330250fb17f6c6d9113679c9c873006cbc4d47fea71e280b63db74c3b5950"
+    }
+  ]
+}

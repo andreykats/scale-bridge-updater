@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scale Bridge Firmware Updater</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/spark-md5.min.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Scale Bridge Firmware Updater</h1>
+    <p class="lede">Update the firmware on the ESP32-S3-Zero in your scale bridge over USB.</p>
+
+    <p id="unsupported" class="notice error" hidden>
+      This browser can't talk to USB serial devices. Open this page in
+      <strong>Chrome</strong> or <strong>Edge</strong> on a computer (Windows, macOS, Linux or ChromeOS).
+    </p>
+
+    <section class="card">
+      <h2>Available firmware</h2>
+      <p id="available">Loading…</p>
+    </section>
+
+    <section class="card">
+      <h2>Your bridge</h2>
+      <ol id="steps" class="steps">
+        <li>Plug the bridge's USB-C port into this computer.</li>
+        <li>Click <strong>Connect</strong> and choose the board from the list (it shows as <em>USB JTAG/serial debug unit</em>).</li>
+      </ol>
+      <dl id="board" class="board" hidden>
+        <dt>Board</dt><dd id="board-chip"></dd>
+        <dt>Installed</dt><dd id="board-installed"></dd>
+      </dl>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <progress id="progress" max="1" value="0" hidden></progress>
+      <div class="actions">
+        <button id="connect" type="button">Connect</button>
+        <button id="flash" type="button" class="primary" hidden></button>
+      </div>
+    </section>
+
+    <details class="log">
+      <summary>Technical log</summary>
+      <pre id="log"></pre>
+    </details>
+  </main>
+</body>
+</html>
