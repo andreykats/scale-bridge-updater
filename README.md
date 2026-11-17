@@ -2,7 +2,7 @@
 
 A web page that updates the firmware on a Scale Bridge (the ESP32-S3-Zero that connects a Brecknell LPS-150 scale to the LPS Scale iPhone app) over USB. Nothing to install.
 
-**Open: <https://andreykats.github.io/scale-bridge-updater/>**
+**Open: <https://scale.drey.dev>**
 
 ## Updating
 

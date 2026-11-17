@@ -2,7 +2,7 @@
 
 Developer notes. End-user instructions are in [README.md](README.md).
 
-Static site that flashes the Scale Bridge firmware over Web Serial using [esptool-js](https://github.com/espressif/esptool-js). The firmware source is in the private `scale-bridge-firmware` repo, expected as a sibling checkout (`../scale-bridge-firmware`). This repo is public; only compiled binaries are published, on the `gh-pages` branch.
+Static site that flashes the Scale Bridge firmware over Web Serial using [esptool-js](https://github.com/espressif/esptool-js). The firmware source is in the private `scale-bridge-firmware` repo, expected as a sibling checkout (`../scale-bridge-firmware`). This repo is public; only compiled binaries are published, on the `gh-pages` branch, served at <https://scale.drey.dev> (DNS: CNAME `scale` → `andreykats.github.io`). `site/CNAME` carries the custom domain: `deploy.sh` replaces `gh-pages` on every deploy, so the file must come from the site, or GitHub drops the domain.
 
 ## Layout
 
